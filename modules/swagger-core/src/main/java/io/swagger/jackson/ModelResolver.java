@@ -2,6 +2,7 @@ package io.swagger.jackson;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -53,7 +54,10 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -592,11 +596,18 @@ public class ModelResolver extends AbstractModelConverter implements ModelConver
         if (propertiesToIgnore.contains(propName)) {
             return true;
         }
+        if (member.hasAnnotation(JsonIgnore.class)) {
+            return true;
+        }
         if (xmlAccessorTypeAnnotation == null) {
             return false;
         }
         if (xmlAccessorTypeAnnotation.value().equals(XmlAccessType.NONE)) {
-            if (!member.hasAnnotation(XmlElement.class)) {
+            if (!member.hasAnnotation(XmlElement.class) &&
+                    !member.hasAnnotation(XmlAttribute.class) &&
+                    !member.hasAnnotation(XmlElementRef.class) &&
+                    !member.hasAnnotation(XmlElementRefs.class) &&
+                    !member.hasAnnotation(JsonProperty.class)) {
                 return true;
             }
         }
